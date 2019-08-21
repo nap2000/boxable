@@ -240,6 +240,7 @@ public abstract class Table<T extends PDPage> {
 	public float draw() throws IOException {
 		ensureStreamIsOpen();
 
+		System.out.println("Drawing table--------------------");		// smap
 		for (Row<T> row : rows) {
 			if (header.contains(row)) {
 				// check if header row height and first data row height can fit
@@ -573,6 +574,7 @@ public abstract class Table<T extends PDPage> {
 
 				int italicCounter = 0;
 				int boldCounter = 0;
+				Color textColor = cell.getTextColor();		// smap
 
 				// print all lines of the cell
 				for (Map.Entry<Integer, List<Token>> entry : cell.getParagraph().getMapLineTokens().entrySet()) {
@@ -619,6 +621,8 @@ public abstract class Table<T extends PDPage> {
 								boldCounter++;
 							} else if ("i".equals(token.getData())) {
 								italicCounter++;
+							} else if ("cb".equals(token.getData())) {	// smap
+								textColor = Color.blue;
 							}
 							break;
 						case CLOSE_TAG:
@@ -626,6 +630,8 @@ public abstract class Table<T extends PDPage> {
 								boldCounter = Math.max(boldCounter - 1, 0);
 							} else if ("i".equals(token.getData())) {
 								italicCounter = Math.max(italicCounter - 1, 0);
+							} else if ("cb".equals(token.getData())) {	// smap
+								textColor = cell.getTextColor();
 							}
 							break;
 						case PADDING:
@@ -676,7 +682,7 @@ public abstract class Table<T extends PDPage> {
 								PDStreamUtils.rect(tableContentStream, cursorX, cursorY,
 										currentFont.getStringWidth(token.getData()) / 1000 * cell.getFontSize(),
 										currentFont.getStringWidth(" ") / 1000 * cell.getFontSize(),
-										cell.getTextColor());
+										textColor);	// Smap use local overridable text color
 								// move cursorX for two characters (one for
 								// bullet, one for space after bullet)
 								cursorX += 2 * currentFont.getStringWidth(" ") / 1000 * cell.getFontSize();
@@ -688,6 +694,7 @@ public abstract class Table<T extends PDPage> {
 							this.tableContentStream.beginText();
 							currentFont = cell.getParagraph().getFont(boldCounter > 0, italicCounter > 0);
 							this.tableContentStream.setFont(currentFont, cell.getFontSize());
+							this.tableContentStream.setNonStrokingColor(textColor);		// smap
 							if (cell.isTextRotated()) {
 								final AffineTransform transform = AffineTransform.getTranslateInstance(cursorX,
 										cursorY);

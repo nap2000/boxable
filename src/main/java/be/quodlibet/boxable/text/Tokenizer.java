@@ -160,6 +160,20 @@ public final class Tokenizer {
 									consumed = true;
 								}
 							}
+				
+						} else if ('c' == lookahead1 && 'b' == lookahead2) {
+							// Smap add color
+							// <cb> Blue
+							if (textIndex < text.length() - 3) {
+								if (sb.length() > 0) {
+									tokens.add(new Token(TokenType.TEXT, sb.toString()));
+									// clean string builder
+									sb.delete(0, sb.length());
+								}
+								tokens.add(new Token(TokenType.OPEN_TAG, "cb"));
+								textIndex += 3;
+								consumed = true;
+							}
 						} else if ('/' == lookahead1) {
 							// one character tags
 							if (textIndex < text.length() - 3) {
@@ -227,6 +241,18 @@ public final class Tokenizer {
 											sb.delete(0, sb.length());
 										}
 										tokens.add(new Token(TokenType.CLOSE_TAG, "li"));
+										textIndex += 4;
+										consumed = true;
+									}
+								} else if ('c' == lookahead2 && 'b' == lookahead3) {
+									// smap close color
+									// </li>
+									if ('>' == lookahead4) {
+										if (sb.length() > 0) {
+											tokens.add(new Token(TokenType.TEXT, sb.toString()));
+											sb.delete(0, sb.length());
+										}
+										tokens.add(new Token(TokenType.CLOSE_TAG, "cb"));
 										textIndex += 4;
 										consumed = true;
 									}
